@@ -6,10 +6,11 @@ import { calcularSubtotal } from "./utilidades/calcularSubtotal.js";
 import { itemsNoCarrinho } from "./validadores/itemsNoCarrinho.js";
 import { aplicarPagamento } from "./utilidades/aplicarPagamento.js";
 import { mascaraDinheiro } from "./utilidades/mascaraDinheiro.js";
+import { dividirItensPorVirgula } from "./utilidades/dividirItensPorVirgula.js";
 
 class CaixaDaLanchonete {
     calcularValorDaCompra(metodoDePagamento, itens) {
-        const listaItens = itens.map(item => item.split(','));
+        const listaItens = dividirItensPorVirgula(itens)
 
         if (!validarFormaDePagamento(metodoDePagamento)) return "Forma de pagamento inválida!";
 
