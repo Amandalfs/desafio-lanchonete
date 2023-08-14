@@ -1,3 +1,5 @@
-export function mascaraDinheiro(valor){
-    return `R$ ${valor.replace('.', ',')}`
+export class MascaraDinheiro {
+    formatar(valor) {
+        return `R$ ${valor.replace('.', ',')}`;
+    }
 }

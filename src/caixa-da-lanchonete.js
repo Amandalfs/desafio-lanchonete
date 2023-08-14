@@ -1,32 +1,29 @@
-import { validarFormaDePagamento } from "./validadores/validarFormaDePagamento.js";
-import { temExtraSemPrincipal } from "./validadores/temExtraSemPrincipal.js";
-import { validarItemExiste } from "./validadores/validarItemExiste.js";
-import { temQuantidadeInvalida } from "./validadores/temQuantidadeInvalida.js";
-import { calcularSubtotal } from "./utilidades/calcularSubtotal.js";
-import { itemsNoCarrinho } from "./validadores/itemsNoCarrinho.js";
-import { aplicarPagamento } from "./utilidades/aplicarPagamento.js";
-import { mascaraDinheiro } from "./utilidades/mascaraDinheiro.js";
-import { dividirItensPorVirgula } from "./utilidades/dividirItensPorVirgula.js";
+import { ValidarFormaDePagamento } from "./validadores/validarFormaDePagamento.js";
+import { MascaraDinheiro } from "./utilidades/mascaraDinheiro.js";
+import { DividirItensPorVirgula } from "./utilidades/dividirItensPorVirgula.js";
+import { Pagamento } from "./utilidades/pagamento.js";
+import { Carrinho } from "./validadores/carrinho.js";
+import { cardapio } from "./cardapio.js";
 
 class CaixaDaLanchonete {
     calcularValorDaCompra(metodoDePagamento, itens) {
-        const listaItens = dividirItensPorVirgula(itens)
+        const listaItens = new DividirItensPorVirgula(itens).formatar()
 
-        if (!validarFormaDePagamento(metodoDePagamento)) return "Forma de pagamento inválida!";
+        const carrinho = new Carrinho(listaItens)
 
-        if (itemsNoCarrinho(listaItens)) return "Não há itens no carrinho de compra!";
+        if (!new ValidarFormaDePagamento(metodoDePagamento).validar()) return "Forma de pagamento inválida!";
 
-        if (temQuantidadeInvalida(listaItens)) return "Quantidade inválida!";
+        if (carrinho.itemsNoCarrinho()) return "Não há itens no carrinho de compra!";
 
-        if (!validarItemExiste(listaItens)) return "Item inválido!";
+        if (carrinho.temQuantidadeInvalida()) return "Quantidade inválida!";
 
-        if (temExtraSemPrincipal(listaItens)) return "Item extra não pode ser pedido sem o principal";
+        if (!carrinho.validarItemExiste(cardapio)) return "Item inválido!";
 
-        const subtotal = calcularSubtotal(listaItens);
+        if (carrinho.temExtraSemPrincipal(cardapio)) return "Item extra não pode ser pedido sem o principal";
 
-        const total = aplicarPagamento(subtotal, metodoDePagamento)
-    
-        return mascaraDinheiro(total);
+        const total = new Pagamento(listaItens, metodoDePagamento)
+
+        return new MascaraDinheiro().formatar(total.aplicarDesconto());
     }
 }
 
