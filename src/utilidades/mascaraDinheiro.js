@@ -1,5 +1,9 @@
 export class MascaraDinheiro {
-    formatar(valor) {
-        return `R$ ${valor.replace('.', ',')}`;
+    constructor(valor){
+        this.valor = valor
+    }
+
+    formatar() {
+        return `R$ ${this.valor.replace('.', ',')}`;
     }
 }

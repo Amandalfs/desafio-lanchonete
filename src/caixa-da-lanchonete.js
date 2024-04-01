@@ -13,17 +13,17 @@ class CaixaDaLanchonete {
 
         if (!new ValidarFormaDePagamento(metodoDePagamento).validar()) return "Forma de pagamento inválida!";
 
-        if (carrinho.itemsNoCarrinho()) return "Não há itens no carrinho de compra!";
+        else if (carrinho.itemsNoCarrinho()) return "Não há itens no carrinho de compra!";
 
-        if (carrinho.temQuantidadeInvalida()) return "Quantidade inválida!";
+        else if (carrinho.temQuantidadeInvalida()) return "Quantidade inválida!";
 
-        if (!carrinho.validarItemExiste(cardapio)) return "Item inválido!";
+        else if (!carrinho.validarItemExiste(cardapio)) return "Item inválido!";
 
-        if (carrinho.temExtraSemPrincipal(cardapio)) return "Item extra não pode ser pedido sem o principal";
+        else if (carrinho.temExtraSemPrincipal(cardapio)) return "Item extra não pode ser pedido sem o principal";
 
         const total = new Pagamento(listaItens, metodoDePagamento)
 
-        return new MascaraDinheiro().formatar(total.aplicarDesconto());
+        return new MascaraDinheiro(total.aplicarDesconto()).formatar();
     }
 }
 
