@@ -1,71 +1,60 @@
 import { cardapio } from "./cardapio.js"
 import { Item } from "./item.js"
-import { UnprocessableError } from "./utilidades/unprocessableError.js"
+import { ErrorDomain } from "./utilidades/error.js"
 
-export class Carrinho {
-    itens = []
-    principal = []
-    extra = []
-    constructor(itensParamentro){
-        if(itensParamentro.length <= 0){
-            throw new UnprocessableError('Não há itens no carrinho de compra!')
-        }
-        
-        itensParamentro.map((objetoDeItem)=>{
-            if(!objetoDeItem.includes(',')){
-                throw new UnprocessableError('Item inválido!')
-            }
-            
-            const [codigo, quantidade] = objetoDeItem.split(",")
+export class Carrinho{
+    produtos = []
+    principais = []
+    extras = []
+    constructor(itensNaoFormatado){
+        itensNaoFormatado.map((itemNaoFormatado) => {
+            const [codigo, quantidade] = itemNaoFormatado.split(',')
 
             if(quantidade <= 0){
-                throw new UnprocessableError('Quantidade inválida!')
+                throw new ErrorDomain('Quantidade inválida!')
             }
 
-            const produtoAchado = cardapio.find((produtoCarpadio)=> {
-                if(produtoCarpadio.codigo === codigo){
-                    return produtoCarpadio
+            const produtoExiste = cardapio.find((itemDoCardapio)=> {
+                if(itemDoCardapio.codigo === codigo){
+                    return itemDoCardapio
                 }
             })
 
-            if(!produtoAchado){
-                throw new UnprocessableError('Item inválido!')
+            if(!produtoExiste){
+                throw new ErrorDomain('Item inválido!')
+            }   
+
+            const produto = new Item(produtoExiste.valor, quantidade)
+
+            if(produtoExiste.descricao.includes("extra")){
+                this.extras.push(produtoExiste)
+            } else {
+                this.principais.push(produtoExiste)
             }
             
-            const item = new Item({preco: produtoAchado.valor, quantidade })
-
-            if(produtoAchado.descricao.includes("extra")){
-                this.extra.push(produtoAchado)
-            } else {
-                this.principal.push(produtoAchado)
-            }
-
-            this.itens.push(item)
+            this.produtos.push(produto)
         })
-
-        if(this.existeExtraSemCafe()){
-            throw new UnprocessableError('Item extra não pode ser pedido sem o principal')
+        if(!this.existeExtraSemPrincipal()){
+            throw new ErrorDomain('Item extra não pode ser pedido sem o principal')
         }
     }
 
-    calcularTotalDoCarrinho(){
-        const total = this.itens.reduce((acumulador, valorAtual)=>{
-            return acumulador + valorAtual.total
+    calcularTotal(){
+        const total = this.produtos.reduce((acumulator, produtoAtual)=> {
+            return produtoAtual.total + acumulator
         }, 0)
         return total
     }
 
-    existeExtraSemCafe(){
-        if(this.extra.length > 0){
-            return !(this.extra.every((produtoExtra)=>{
-                return this.principal.some((produtoPrincipal)=>{
-                    if(produtoPrincipal.extra === produtoExtra.codigo){
-                        return true
-                    } else {
-                        return false
-                    }
-                }) 
+    existeExtraSemPrincipal(){
+        if(this.extras.length > 0){
+            return (this.extras.every((produtoExtra)=>{
+                return this.principais.some((produtoPrincipal)=> {
+                    return produtoExtra.codigo === produtoPrincipal.extra
+                })
             }))
+        } else {
+            return true
         }
     }
 }
